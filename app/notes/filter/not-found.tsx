@@ -1,15 +1,20 @@
 import Link from 'next/link';
-import css from './Home.module.css';
 
 export default function NotFound() {
   return (
-    <div className={css.container}>
-      <h1 className={css.title}>404 - Page not found</h1>
-      <p className={css.description}>
-        Sorry, the page you are looking for does not exist.
-      </p>
-      <Link href="/" style={{ color: 'var(--blue)', textDecoration: 'underline' }}>
-        Return Home
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      height: '100vh',
+      textAlign: 'center',
+      fontFamily: 'sans-serif'
+    }}>
+      <h1>404 - Page Not Found</h1>
+      <p>Oops! The page you are looking for does not exist.</p>
+      <Link href="/" style={{ color: '#0070f3', textDecoration: 'underline' }}>
+        Return to Home
       </Link>
     </div>
   );
