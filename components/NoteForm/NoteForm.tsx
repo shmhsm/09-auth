@@ -9,7 +9,9 @@ import { CreateNotePayload } from '../../types/note';
 import css from './NoteForm.module.css';
 
 const MyCustomError = ({ children }: { children?: React.ReactNode }) => (
-  <div className={css.errorText}>{children}</div>
+  <span style={{ color: 'red', fontSize: '12px', display: 'block', marginTop: '4px' }}>
+    {children}
+  </span>
 );
 
 interface NoteFormProps {
@@ -18,15 +20,15 @@ interface NoteFormProps {
 
 const NoteSchema = Yup.object().shape({
   title: Yup.string()
-    .min(3, 'Title must be at least 3 characters')
-    .max(50, 'Title must be less than 50 characters')
-    .required('Title is required'),
+    .min(3, 'Minimum 3 characters')
+    .max(50, 'Maximum 50 characters')
+    .required('Required'),
   content: Yup.string()
-    .max(500, 'Content must be less than 500 characters')
+    .max(500, 'Maximum 500 characters')
     .optional(),
   tag: Yup.string()
-    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping']) 
-    .required('Tag is required'),
+    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
+    .required('Required'),
 });
 
 export default function NoteForm({ onCancel }: NoteFormProps) {
@@ -45,7 +47,7 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
       initialValues={{ 
         title: '', 
         content: '', 
-        tag: 'Todo' as const 
+        tag: 'Todo' as const
       }}
       validationSchema={NoteSchema}
       onSubmit={(values: CreateNotePayload) => mutation.mutate(values)}
@@ -53,25 +55,17 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
       {({ isSubmitting }) => (
         <Form className={css.form}>
           <div className={css.fieldWrapper}>
-            <label htmlFor="title">Title</label>
-            <Field name="title" id="title" placeholder="Enter title" />
+            <Field name="title" placeholder="Title" />
             <ErrorMessage name="title" component={MyCustomError} />
           </div>
 
           <div className={css.fieldWrapper}>
-            <label htmlFor="content">Content</label>
-            <Field 
-              name="content" 
-              id="content" 
-              as="textarea" 
-              placeholder="Enter content (optional)" 
-            />
+            <Field name="content" as="textarea" placeholder="Content (optional)" />
             <ErrorMessage name="content" component={MyCustomError} />
           </div>
 
           <div className={css.fieldWrapper}>
-            <label htmlFor="tag">Category</label>
-            <Field name="tag" id="tag" as="select">
+            <Field name="tag" as="select">
               <option value="Todo">Todo</option>
               <option value="Work">Work</option>
               <option value="Personal">Personal</option>
@@ -82,19 +76,9 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
           </div>
 
           <div className={css.actions}>
-            <button 
-                type="button" 
-                className={css.cancelBtn} 
-                onClick={onCancel}
-            >
-              Cancel
-            </button>
-            <button 
-                type="submit" 
-                className={css.submitBtn} 
-                disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Creating...' : 'Create note'}
+            <button type="button" onClick={onCancel}>Cancel</button>
+            <button type="submit" disabled={isSubmitting}>
+              Create note
             </button>
           </div>
         </Form>

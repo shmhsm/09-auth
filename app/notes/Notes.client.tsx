@@ -1,85 +1,56 @@
 'use client';
 
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createNote } from '../../lib/api';
-import { CreateNotePayload } from '../../types/note';
-import css from './NoteForm.module.css';
+import { useState } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useDebounce } from 'use-debounce';
+import { fetchNotes } from '../../lib/api';
+import NoteList from '../../components/NoteList/NoteList';
+import Pagination from '../../components/Pagination/Pagination';
+import SearchBox from '../../components/SearchBox/SearchBox';
+import Modal from '../../components/Modal/Modal';
+import NoteForm from '../../components/NoteForm/NoteForm';
 
-const MyCustomError = ({ children }: { children?: React.ReactNode }) => (
-  <div className={css.errorText}>{children}</div>
-);
+export default function NotesClient() {
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-interface NoteFormProps {
-  onCancel: () => void;
-}
+  const [debouncedSearch] = useDebounce(search, 500);
 
-const NoteSchema = Yup.object().shape({
-  title: Yup.string()
-    .min(3, 'Minimum 3 characters')
-    .max(50, 'Maximum 50 characters')
-    .required('Required'),
-  content: Yup.string()
-    .max(500, 'Maximum 500 characters')
-    .optional(),
-  tag: Yup.string()
-    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping']) 
-    .required('Required'),
-});
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
 
-export default function NoteForm({ onCancel }: NoteFormProps) {
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: (newNote: CreateNotePayload) => createNote(newNote),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      onCancel();
-    },
+  const { data, isLoading } = useQuery({
+    queryKey: ['notes', page, debouncedSearch],
+    queryFn: () => fetchNotes({ page, perPage: 6, search: debouncedSearch }),
+    placeholderData: keepPreviousData,
   });
 
+  const totalPages = data?.totalPages || 0;
+
   return (
-    <Formik
-      initialValues={{ 
-        title: '', 
-        content: '', 
-        tag: 'Todo' as const
-      }}
-      validationSchema={NoteSchema}
-      onSubmit={(values: CreateNotePayload) => mutation.mutate(values)}
-    >
-      {({ isSubmitting }) => (
-        <Form className={css.form}>
-          <div className={css.fieldWrapper}>
-            <Field name="title" placeholder="Title" />
-            <ErrorMessage name="title" component={MyCustomError} />
-          </div>
+    <div>
+      <SearchBox value={search} onChange={handleSearchChange} />
+      
+      <button onClick={() => setIsModalOpen(true)}>Add Note</button>
+      
+      {isLoading ? <p>Loading...</p> : <NoteList notes={data?.notes || []} />}
 
-          <div className={css.fieldWrapper}>
-            <Field name="content" as="textarea" placeholder="Content (optional)" />
-            <ErrorMessage name="content" component={MyCustomError} />
-          </div>
-
-          <div className={css.fieldWrapper}>
-            <Field name="tag" as="select">
-              <option value="Todo">Todo</option>
-              <option value="Work">Work</option>
-              <option value="Personal">Personal</option>
-              <option value="Meeting">Meeting</option>
-              <option value="Shopping">Shopping</option>
-            </Field>
-            <ErrorMessage name="tag" component={MyCustomError} />
-          </div>
-
-          <div className={css.actions}>
-            <button type="button" onClick={onCancel}>Cancel</button>
-            <button type="submit" disabled={isSubmitting}>
-              Create note
-            </button>
-          </div>
-        </Form>
+      {totalPages > 1 && (
+        <Pagination 
+          pageCount={totalPages} 
+          onPageChange={(p) => setPage(p)} 
+          forcePage={page - 1} 
+        />
       )}
-    </Formik>
+
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <NoteForm onCancel={() => setIsModalOpen(false)} /> 
+        </Modal>
+      )}
+    </div>
   );
 }

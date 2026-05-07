@@ -1,4 +1,3 @@
-// Строго по списку: Todo, Work, Personal, Meeting, Shopping
 export type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';
 
 export interface Note {
