@@ -2,15 +2,22 @@ import NoteList from '../../../../components/NoteList/NoteList';
 import { fetchNotes } from '../../../../lib/api';
 import css from './NotesPage.module.css';
 
-export default async function FilteredNotesPage({
-  params,
-}: {
-  params: { tag?: string[] };
-}) {
-  const selectedTag = params.tag?.[0];
+interface Props {
+  params: Promise<{ tag?: string[] }>;
+}
+
+export default async function FilteredNotesPage({ params }: Props) {
+  const { tag } = await params;
+  
+  const selectedTag = tag?.[0];
   const queryTag = selectedTag === 'all' ? undefined : selectedTag;
 
-  const data = await fetchNotes({ search: '', page: 1, perPage: 12, tag: queryTag });
+  const data = await fetchNotes({ 
+    search: '', 
+    page: 1, 
+    perPage: 12, 
+    tag: queryTag 
+  });
 
   return (
     <div className={css.container}>
