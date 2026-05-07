@@ -1,13 +1,14 @@
 'use client';
 
-import { Formik, Form, Field } from 'formik';
+import React from 'react';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createNote } from '../../lib/api';
 import { CreateNotePayload } from '../../types/note';
 import css from './NoteForm.module.css';
 
-const CustomErrorMessage = ({ children }: { children?: React.ReactNode }) => (
+const MyCustomError = ({ children }: { children?: React.ReactNode }) => (
   <div className={css.errorText}>{children}</div>
 );
 
@@ -17,15 +18,15 @@ interface NoteFormProps {
 
 const NoteSchema = Yup.object().shape({
   title: Yup.string()
-    .min(3, 'Too Short!')
-    .max(50, 'Too Long!')
-    .required('Required'),
+    .min(3, 'Title must be at least 3 characters')
+    .max(50, 'Title must be less than 50 characters')
+    .required('Title is required'),
   content: Yup.string()
-    .max(500, 'Max 500 symbols')
+    .max(500, 'Content must be less than 500 characters')
     .optional(),
   tag: Yup.string()
-    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping'])
-    .required('Required'),
+    .oneOf(['Todo', 'Work', 'Personal', 'Meeting', 'Shopping']) 
+    .required('Tag is required'),
 });
 
 export default function NoteForm({ onCancel }: NoteFormProps) {
@@ -41,30 +42,60 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
 
   return (
     <Formik
-      initialValues={{ title: '', content: '', tag: 'Todo' as const }} 
+      initialValues={{ 
+        title: '', 
+        content: '', 
+        tag: 'Todo' as const 
+      }}
       validationSchema={NoteSchema}
       onSubmit={(values: CreateNotePayload) => mutation.mutate(values)}
     >
-      {({ isSubmitting, errors, touched }) => (
+      {({ isSubmitting }) => (
         <Form className={css.form}>
-          <Field name="title" placeholder="Title" />
-          {errors.title && touched.title && <CustomErrorMessage>{errors.title}</CustomErrorMessage>}
+          <div className={css.fieldWrapper}>
+            <label htmlFor="title">Title</label>
+            <Field name="title" id="title" placeholder="Enter title" />
+            <ErrorMessage name="title" component={MyCustomError} />
+          </div>
 
-          <Field name="content" as="textarea" placeholder="Content (optional)" />
-          {errors.content && touched.content && <CustomErrorMessage>{errors.content}</CustomErrorMessage>}
+          <div className={css.fieldWrapper}>
+            <label htmlFor="content">Content</label>
+            <Field 
+              name="content" 
+              id="content" 
+              as="textarea" 
+              placeholder="Enter content (optional)" 
+            />
+            <ErrorMessage name="content" component={MyCustomError} />
+          </div>
 
-          <Field name="tag" as="select">
-            <option value="Todo">Todo</option>
-            <option value="Work">Work</option>
-            <option value="Personal">Personal</option>
-            <option value="Meeting">Meeting</option>
-            <option value="Shopping">Shopping</option>
-          </Field>
-          {errors.tag && touched.tag && <CustomErrorMessage>{errors.tag}</CustomErrorMessage>}
+          <div className={css.fieldWrapper}>
+            <label htmlFor="tag">Category</label>
+            <Field name="tag" id="tag" as="select">
+              <option value="Todo">Todo</option>
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Shopping">Shopping</option>
+            </Field>
+            <ErrorMessage name="tag" component={MyCustomError} />
+          </div>
 
           <div className={css.actions}>
-            <button type="button" onClick={onCancel}>Cancel</button>
-            <button type="submit" disabled={isSubmitting}>Create note</button>
+            <button 
+                type="button" 
+                className={css.cancelBtn} 
+                onClick={onCancel}
+            >
+              Cancel
+            </button>
+            <button 
+                type="submit" 
+                className={css.submitBtn} 
+                disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Creating...' : 'Create note'}
+            </button>
           </div>
         </Form>
       )}
