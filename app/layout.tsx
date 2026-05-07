@@ -1,23 +1,36 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import TanStackProvider from "../components/TanStackProvider/TanStackProvider";
 
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Coffee Review App",
+  description: "Small project for coffee reviews",
+};
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+  modal: React.ReactNode;
+}
 
 export default function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+  modal,
+}: RootLayoutProps) {
   return (
     <html lang="en">
-      <body>
+      <body className={inter.className}>
         <TanStackProvider>
-          <div className="wrapper">
-            <Header />
-            <main className="main-content">{children}</main>
-            <Footer />
-          </div>
+          <Header />
+          <main>
+            {children}
+          </main>
+          {modal}
+          <Footer />
         </TanStackProvider>
       </body>
     </html>
