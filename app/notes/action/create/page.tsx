@@ -4,12 +4,17 @@ import css from './page.module.css';
 
 export const metadata: Metadata = {
   title: 'Create New Note | NoteHub',
-  description: 'Create a new note and save your thoughts.',
+  description: 'Create a new note and save your thoughts to NoteHub.',
   openGraph: {
-    title: 'Create Note - NoteHub',
-    description: 'Quickly add a new note to your collection.',
-    url: "https://08-zustand-roan-three.vercel.app/notes/action/create",
-    images: ['https://ac.goit.global/fullstack/react/notehub-og-meta.jpg'],
+    title: 'Create New Note | NoteHub',
+    description: 'Add a new note to your collection quickly and easily.',
+    url: 'https://08-zustand-roan-three.vercel.app/notes/action/create',
+    images: [
+      {
+        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+      },
+    ],
+    type: 'website',
   },
 };
 

@@ -1,10 +1,9 @@
-// components/NoteForm/NoteForm.tsx
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNoteStore } from '../../lib/store/noteStore';
-import { createNote } from '../../lib/api/notes'; 
+import { createNote } from '../../lib/api/notes';
 import css from './NoteForm.module.css';
 
 export default function NoteForm() {
@@ -19,7 +18,7 @@ export default function NoteForm() {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
       router.back();
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       alert('Failed to create note: ' + error.message);
     }
   });
@@ -36,19 +35,50 @@ export default function NoteForm() {
 
   return (
     <form className={css.form} onSubmit={handleSubmit}>
-      <input name="title" value={draft.title} onChange={handleChange} required className={css.input} />
-      <textarea name="content" value={draft.content} onChange={handleChange} required className={css.textarea} />
-      <select name="tag" value={draft.tag} onChange={handleChange} className={css.select}>
+      <input 
+        name="title" 
+        value={draft.title} 
+        onChange={handleChange} 
+        required 
+        className={css.input} 
+        placeholder="Title"
+      />
+      <textarea 
+        name="content" 
+        value={draft.content} 
+        onChange={handleChange} 
+        required 
+        className={css.textarea} 
+        placeholder="Content"
+      />
+      
+      <select 
+        name="tag" 
+        value={draft.tag} 
+        onChange={handleChange} 
+        className={css.select}
+      >
         <option value="Todo">Todo</option>
         <option value="Work">Work</option>
         <option value="Personal">Personal</option>
+        <option value="Meeting">Meeting</option>
+        <option value="Shopping">Shopping</option>
       </select>
 
       <div className={css.buttons}>
-        <button type="button" onClick={() => router.back()} className={css.cancelBtn} disabled={mutation.isPending}>
+        <button 
+          type="button" 
+          onClick={() => router.back()} 
+          className={css.cancelBtn} 
+          disabled={mutation.isPending}
+        >
           Cancel
         </button>
-        <button type="submit" className={css.submitBtn} disabled={mutation.isPending}>
+        <button 
+          type="submit" 
+          className={css.submitBtn} 
+          disabled={mutation.isPending}
+        >
           {mutation.isPending ? 'Creating...' : 'Create'}
         </button>
       </div>
