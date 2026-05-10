@@ -19,7 +19,7 @@ export default async function proxy(request: NextRequest) {
   }
 
   if (isAuthRoute && accessToken) {
-    return NextResponse.redirect(new URL('/profile', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   if ((isPrivateRoute || isAuthRoute) && !accessToken && refreshToken) {
@@ -28,7 +28,7 @@ export default async function proxy(request: NextRequest) {
 
       if (sessionResponse.status === 200) {
         const response = isAuthRoute 
-          ? NextResponse.redirect(new URL('/profile', request.url))
+          ? NextResponse.redirect(new URL('/', request.url))
           : NextResponse.next();
 
         const setCookieHeader = sessionResponse.headers['set-cookie'];
