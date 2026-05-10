@@ -37,7 +37,11 @@ export const fetchNoteById = async (cookies: string, id: string): Promise<Note> 
   return response.data;
 };
 
-export const checkSession = async (cookies: string): Promise<User | null> => {
-  const response = await instance.get('/auth/session', getAuthHeaders(cookies));
-  return response.data || null;
+export const checkSession = async (cookieHeader: string) => {
+  const response = await instance.get('/auth/session', {
+    headers: {
+      Cookie: cookieHeader,
+    },
+  });
+  return response; 
 };

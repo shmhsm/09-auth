@@ -1,16 +1,14 @@
-import { ReactNode } from 'react';
-import css from './AuthLayout.module.css';
+'use client';
 
-interface AuthLayoutProps {
-  children: ReactNode;
-}
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function AuthLayout({ children }: AuthLayoutProps) {
-  return (
-    <section className={css.authWrapper}>
-      <div className={css.container}>
-        {children}
-      </div>
-    </section>
-  );
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.refresh();
+  }, [router]);
+
+  return <>{children}</>;
 }

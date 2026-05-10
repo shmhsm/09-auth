@@ -1,8 +1,6 @@
-
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'https://ac.goit.global/fullstack/react/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://notehub-api.goit.global',
+  withCredentials: true,
 });
-
-export const instance = api;

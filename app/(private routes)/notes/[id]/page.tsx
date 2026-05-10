@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api/notes';
+import { fetchNoteById } from '@/lib/api/serverApi';
 import NoteDetails from '../../notes/[id]/NoteDetails.client'; 
 import css from './page.module.css';
 
@@ -10,7 +11,10 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const note = await fetchNoteById(id);
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+  
+  const note = await fetchNoteById(id, cookieHeader);
 
   return {
     title: `${note?.title || 'Note Details'} | NoteHub`,
@@ -26,18 +30,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function NotePage({ params }: Props) {
   const { id } = await params;
+  const cookieStore = await cookies(); // Получаем куки
+  const cookieHeader = cookieStore.toString();
+  
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: ['note', id],
-    queryFn: () => fetchNoteById(id),
+    queryFn: () => fetchNoteById(id, cookieHeader),
   });
 
   return (
-  <main className={css.main}>
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <NoteDetails id={id} />
-    </HydrationBoundary>
-  </main>
-);
+    <main className={css.main}>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <NoteDetails id={id} />
+      </HydrationBoundary>
+    </main>
+  );
 }

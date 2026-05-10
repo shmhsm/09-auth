@@ -1,4 +1,3 @@
-// lib/api/clientApi.ts
 import { instance } from './api';
 import { User } from '../../types/user';
 import { Note } from '../../types/note';
@@ -19,10 +18,10 @@ interface FetchNotesParams {
   tag?: string;
 }
 
-interface NotesResponse {
+ interface NotesResponse {
   notes: Note[];
   total: number;
-  pages: number;
+  totalPages: number; 
 }
 
 // --- Авторизация ---

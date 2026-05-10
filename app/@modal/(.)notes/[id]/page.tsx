@@ -1,5 +1,6 @@
+import { cookies } from 'next/headers';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api/notes';
+import { fetchNoteById } from '@/lib/api/serverApi';
 import NotePreview from '@/components/NotePreview/NotePreview'; 
 
 interface PageProps {
@@ -8,11 +9,14 @@ interface PageProps {
 
 export default async function NoteModalPage({ params }: PageProps) {
   const { id } = await params;
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+  
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: ['note', id],
-    queryFn: () => fetchNoteById(id),
+    queryFn: () => fetchNoteById(id, cookieHeader),
   });
 
   return (
