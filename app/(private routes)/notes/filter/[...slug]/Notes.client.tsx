@@ -38,8 +38,8 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
   const totalPages = data?.totalPages || 0;
 
-  return (
-    <div>
+    return (
+      <div className={css.container}> 
       <SearchBox value={search} onChange={handleSearchChange} />
       
       <Link href="/notes/action/create" className={css.createLink}>
