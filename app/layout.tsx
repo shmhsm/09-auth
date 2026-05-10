@@ -1,10 +1,10 @@
-// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import TanStackProvider from "../components/TanStackProvider/TanStackProvider";
+import AuthProvider from "../components/AuthProvider/AuthProvider";
 
 const roboto = Roboto({
   weight: ["400", "500", "700"],
@@ -19,8 +19,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "NoteHub - Your Personal Knowledge Base",
     description: "Organize your thoughts, tasks, and ideas with NoteHub.",
-    url: "https://08-zustand-roan-three.vercel.app",
-    images: ["https://ac.goit.global/fullstack/react/notehub-og-meta.jpg"],
+    url: "https://09-auth-your-name.vercel.app", 
+    images: [{ url: "https://ac.goit.global/fullstack/react/notehub-og-meta.jpg" }],
     type: "website",
   },
 };
@@ -36,10 +36,13 @@ export default function RootLayout({
     <html lang="en" className={roboto.variable}>
       <body className={roboto.className}>
         <TanStackProvider>
-          <Header />
-          <main>{children}</main>
-          {modal}
-          <Footer />
+          <AuthProvider>
+            <Header />
+            <main>{children}</main>
+            {modal}
+            <Footer />
+            <div id="modal-root" />
+          </AuthProvider>
         </TanStackProvider>
       </body>
     </html>
