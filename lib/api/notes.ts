@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://ваша-база-данных.com', 
+  baseURL: 'https://ac.goit.global/fullstack/react/api', 
 });
 
 interface NoteData {

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getMe } from '../../../lib/api/serverApi';
+import { getMe } from '@/lib/api/serverApi';
 import css from './ProfilePage.module.css';
 
 export const metadata = {
