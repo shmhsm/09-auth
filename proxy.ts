@@ -14,6 +14,7 @@ export default async function proxy(request: NextRequest) {
   const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
+  // 1. Быстрая проверка прав доступа
   if (isPrivateRoute && !accessToken && !refreshToken) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
   }
@@ -22,6 +23,7 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
+  // 2. Логика обновления сессии
   if ((isPrivateRoute || isAuthRoute) && !accessToken && refreshToken) {
     try {
       const sessionResponse = await checkSession();
@@ -31,17 +33,34 @@ export default async function proxy(request: NextRequest) {
           ? NextResponse.redirect(new URL('/', request.url))
           : NextResponse.next();
 
+        // --- ИСПРАВЛЕНИЯ ПО ЗАМЕЧАНИЯМ МЕНТОРА ---
+        
         const setCookieHeader = sessionResponse.headers['set-cookie'];
+
         if (setCookieHeader) {
-          setCookieHeader.forEach((cookieString) => {
-            const [fullCookie] = cookieString.split(';');
-            const [name, value] = fullCookie.split('=');
-            response.cookies.set(name.trim(), value.trim(), {
-              path: '/',
-              httpOnly: true,
-              secure: true,
-              sameSite: 'lax',
-            });
+          // А) Нормализация: превращаем в массив, если пришла строка
+          const cookiesToProcess = Array.isArray(setCookieHeader) 
+            ? setCookieHeader 
+            : [setCookieHeader];
+
+          cookiesToProcess.forEach((cookieString) => {
+            // Б) Надежный парсинг (обрабатываем случай, если в значении есть "=")
+            // Берем всё до первой точки с запятой
+            const firstPart = cookieString.split(';')[0];
+            // Находим индекс ПЕРВОГО вхождения "=", чтобы не сломать значение куки
+            const firstEqualIndex = firstPart.indexOf('=');
+            
+            if (firstEqualIndex !== -1) {
+              const name = firstPart.substring(0, firstEqualIndex).trim();
+              const value = firstPart.substring(firstEqualIndex + 1).trim();
+
+              response.cookies.set(name, value, {
+                path: '/',
+                httpOnly: true,
+                secure: true,
+                sameSite: 'lax',
+              });
+            }
           });
         }
         return response;
