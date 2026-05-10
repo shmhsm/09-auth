@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getMe } from '@/lib/api/serverApi';
-import css from './ProfilePage.module.css';
+import css from './page.module.css';
 
 export const metadata = {
   title: 'Profile | NoteHub',
