@@ -8,7 +8,7 @@ import { fetchNotes } from '@/lib/api/notes';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
-import css from './Notes.module.css';
+import css from './NotesPage.module.css';
 
 interface NotesClientProps {
   tag?: string;
