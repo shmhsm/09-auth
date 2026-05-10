@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { api } from '@/app/api/api';
-
+import { isAxiosError } from 'axios'; 
+import { api } from '@/app/api/api'; 
+import { logErrorResponse } from '../../_utils/utils'; 
 export async function POST() {
   try {
     const cookieStore = await cookies();
-    const allCookies = cookieStore.toString();
+    
+    const cookieHeader = cookieStore
+      .getAll()
+      .map((c) => `${c.name}=${c.value}`)
+      .join('; ');
 
     await api.post('/auth/logout', {}, {
       headers: {
-        Cookie: allCookies,
+        'Cookie': cookieHeader,
       },
     });
 
@@ -17,10 +22,20 @@ export async function POST() {
     cookieStore.delete('refreshToken');
 
     return NextResponse.json({ message: 'Logged out successfully' });
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error('Logout error:', error.message);
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
+      return NextResponse.json(
+        { 
+          error: error.message, 
+          response: error.response?.data 
+        },
+        { status: error.response?.status || 500 }
+      );
     }
-    return NextResponse.json({ error: 'Logout failed' }, { status: 500 });
+
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    logErrorResponse({ message });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
