@@ -1,0 +1,1 @@
+export const API_PROXY_URL = 'https://ac.goit.global/fullstack/react';
