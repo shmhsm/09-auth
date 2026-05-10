@@ -5,26 +5,22 @@ import { api } from '@/app/api/api';
 export async function POST() {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
-    const refreshToken = cookieStore.get('refreshToken')?.value;
+    const allCookies = cookieStore.toString();
 
-    await api.post(
-      '/auth/logout',
-      { refreshToken },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    await api.post('/auth/logout', {}, {
+      headers: {
+        Cookie: allCookies,
+      },
+    });
 
-    const response = NextResponse.json({ message: 'Logged out successfully' });
-    
-    response.cookies.delete('accessToken');
-    response.cookies.delete('refreshToken');
+    cookieStore.delete('accessToken');
+    cookieStore.delete('refreshToken');
 
-    return response;
-  } catch {
+    return NextResponse.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Logout error:', error.message);
+    }
     return NextResponse.json({ error: 'Logout failed' }, { status: 500 });
   }
 }

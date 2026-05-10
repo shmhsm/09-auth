@@ -2,34 +2,42 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkSession } from '@/lib/api/serverApi';
 
-const privateRoutes = ['/profile', '/notes'];
-const authRoutes = ['/sign-in', '/sign-up'];
-
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const cookieHeader = request.headers.get('cookie') || '';
+  const accessToken = request.cookies.get('accessToken')?.value;
+  const refreshToken = request.cookies.get('refreshToken')?.value;
+
+  const privateRoutes = ['/profile', '/notes'];
+  const authRoutes = ['/sign-in', '/sign-up'];
 
   const isPrivateRoute = privateRoutes.some((route) => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
 
-  if (isPrivateRoute) {
-    try {
-      const response = await checkSession(cookieHeader);
-      if (response.status !== 200) {
-        return NextResponse.redirect(new URL('/sign-in', request.url));
-      }
-    } catch {
-      return NextResponse.redirect(new URL('/sign-in', request.url));
-    }
+  if (isPrivateRoute && !accessToken && !refreshToken) {
+    return NextResponse.redirect(new URL('/sign-in', request.url));
   }
 
-  if (isAuthRoute) {
+  if (isPrivateRoute || isAuthRoute) {
     try {
-      const response = await checkSession(cookieHeader);
-      if (response.status === 200) {
+      const response = await checkSession(); 
+      
+      if (isPrivateRoute && response.status !== 200) {
+        return NextResponse.redirect(new URL('/sign-in', request.url));
+      }
+      if (isAuthRoute && response.status === 200) {
         return NextResponse.redirect(new URL('/profile', request.url));
       }
+
+      const nextResponse = NextResponse.next();
+      
+      const setCookie = response.headers['set-cookie'];
+      if (setCookie) {
+        nextResponse.headers.set('set-cookie', setCookie.join(', '));
+      }
+      
+      return nextResponse;
     } catch {
+      if (isPrivateRoute) return NextResponse.redirect(new URL('/sign-in', request.url));
     }
   }
 
@@ -37,5 +45,10 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/profile/:path*',
+    '/notes/:path*',
+    '/sign-in',
+    '/sign-up'
+  ],
 };

@@ -1,47 +1,27 @@
-import { instance } from './api';
-import { User } from '../../types/user';
-import { Note } from '../../types/note';
+import { cookies } from 'next/headers';
+import { api } from '@/app/api/api';
+import { Note } from '@/types/note'; 
+import { User } from '@/types/user'; 
 
-interface FetchNotesParams {
-  search?: string;
-  page?: number;
-  perPage?: number;
-  tag?: string;
-}
-
-interface NotesResponse {
-  notes: Note[];
-  total: number;
-  pages: number;
-}
-
-const getAuthHeaders = (cookies: string) => ({
-  headers: { Cookie: cookies },
-});
-
-export const getMe = async (cookies: string): Promise<User> => {
-  const response = await instance.get('/users/me', getAuthHeaders(cookies));
-  return response.data;
-};
-
-export const fetchNotes = async (cookies: string, params: FetchNotesParams): Promise<NotesResponse> => {
-  const response = await instance.get('/notes', {
-    ...getAuthHeaders(cookies),
-    params,
+export const checkSession = async () => {
+  const cookieStore = await cookies();
+  return api.get('/auth/session', {
+    headers: { Cookie: cookieStore.toString() },
   });
-  return response.data;
 };
 
-export const fetchNoteById = async (cookies: string, id: string): Promise<Note> => {
-  const response = await instance.get(`/notes/${id}`, getAuthHeaders(cookies));
-  return response.data;
-};
-
-export const checkSession = async (cookieHeader: string) => {
-  const response = await instance.get('/auth/session', {
-    headers: {
-      Cookie: cookieHeader,
-    },
+export const getMe = async (): Promise<User> => { 
+  const cookieStore = await cookies();
+  const { data } = await api.get('/users/me', {
+    headers: { Cookie: cookieStore.toString() },
   });
-  return response; 
+  return data;
+};
+
+export const fetchNoteById = async (id: string): Promise<Note> => { 
+  const cookieStore = await cookies();
+  const { data } = await api.get(`/notes/${id}`, {
+    headers: { Cookie: cookieStore.toString() },
+  });
+  return data;
 };
